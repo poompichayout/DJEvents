@@ -1,6 +1,7 @@
-import Layout from "@/components/Layout";
-import EventItem from "@/components/EventItem";
-import { API_URL } from "@/config/index";
+import Layout from '@/components/Layout';
+import EventItem from '@/components/EventItem';
+import { API_URL } from '@/config/index';
+import { transEventsWithPicture } from '@/lib/helpers';
 
 export default function EventsPage({ events }) {
 	return (
@@ -15,11 +16,12 @@ export default function EventsPage({ events }) {
 }
 
 export async function getStaticProps() {
-	const res = await fetch(`${API_URL}/api/events`);
+	const res = await fetch(`${API_URL}/api/events?sort=date:ASC&populate=*`);
 	const events = await res.json();
+	const data = transEventsWithPicture(events.data);
 
 	return {
-		props: { events },
+		props: { events: data },
 		revalidate: 1,
 	};
 }

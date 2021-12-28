@@ -1,7 +1,9 @@
-import Link from "next/link";
-import Layout from "@/components/Layout";
-import EventItem from "@/components/EventItem";
-import { API_URL } from "@/config/index";
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import Layout from '@/components/Layout';
+import EventItem from '@/components/EventItem';
+import { API_URL } from '@/config/index';
+import { transEventsWithPicture } from '@/lib/helpers';
 
 export default function Home({ events }) {
 	return (
@@ -13,22 +15,23 @@ export default function Home({ events }) {
 					<EventItem key={evt.id} evt={evt} />
 				))}
 
-        {events.length > 0 && (
-          <Link href='/events'>
-            <a className="btn-secondary">View All Events</a>
-          </Link>
-        )}
+				{events.length > 0 && (
+					<Link href="/events">
+						<a className="btn-secondary">View All Events</a>
+					</Link>
+				)}
 			</Layout>
 		</div>
 	);
 }
 
 export async function getStaticProps() {
-	const res = await fetch(`${API_URL}/api/events`);
-	const events = await res.json();
+	const res = await fetch(`${API_URL}/api/events?sort=date:ASC&populate=*`);
+	const json = await res.json();
+	const data = transEventsWithPicture(json.data);
 
 	return {
-		props: { events: events.slice(0, 3) },
+		props: { events: data.slice(0, 3) },
 		revalidate: 1,
 	};
 }

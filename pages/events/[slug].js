@@ -1,13 +1,14 @@
-import { FaPencilAlt, FaTimes } from "react-icons/fa";
-import Link from "next/link";
-import Image from "next/image";
-import Layout from "@/components/Layout";
-import { API_URL } from "@/config/index";
-import styles from "@/styles/Event.module.css";
+import { FaPencilAlt, FaTimes } from 'react-icons/fa';
+import Link from 'next/link';
+import Image from 'next/image';
+import Layout from '@/components/Layout';
+import { API_URL } from '@/config/index';
+import styles from '@/styles/Event.module.css';
+import { transEventsWithPicture } from '@/lib/helpers';
 
 export default function EventPage({ evt }) {
 	const deleteEvent = (e) => {
-		console.log("delete");
+		console.log('delete');
 	};
 
 	return (
@@ -25,33 +26,40 @@ export default function EventPage({ evt }) {
 				</div>
 
 				<span>
-					{evt.date} at {evt.time}
+					{new Date(evt.date).toLocaleDateString('en-US')} at{' '}
+					{evt.time}
 				</span>
 				<h1>{evt.name}</h1>
 				{evt.image && (
 					<div className={styles.image}>
-						<Image src={evt.image} width={960} height={600} />
+						<Image
+							src={evt.image.formats.large.url}
+							width={960}
+							height={600}
+							alt=""
+						/>
 					</div>
 				)}
 
-                <h3>Performers:</h3>
-                <p>{evt.performers}</p>
-                <h3>Descriptions:</h3>
-                <p>{evt.description}</p>
-                <h3>Venue:</h3>
-                <p>{evt.address}</p>
+				<h3>Performers:</h3>
+				<p>{evt.performers}</p>
+				<h3>Descriptions:</h3>
+				<p>{evt.description}</p>
+				<h3>Venue:</h3>
+				<p>{evt.address}</p>
 
-                <Link href='/events'>
-                    <a className={styles.back}>{'<'} Go Back</a>
-                </Link>
+				<Link href="/events">
+					<a className={styles.back}>{'<'} Go Back</a>
+				</Link>
 			</div>
 		</Layout>
 	);
 }
 
 export async function getStaticPaths() {
-	const res = await fetch(`${API_URL}/api/events`);
-	const events = await res.json();
+	const res = await fetch(`${API_URL}/api/events?sort=date:ASC&populate=*`);
+	let events = await res.json();
+	events = transEventsWithPicture(events.data);
 
 	const paths = events.map((evt) => ({
 		params: { slug: evt.slug },
@@ -64,8 +72,24 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params: { slug } }) {
-	const res = await fetch(`${API_URL}/api/events/${slug}`);
-	const events = await res.json();
+	const qs = require('qs');
+	const query = qs.stringify(
+		{
+			filters: {
+				slug: {
+					$eq: slug,
+				},
+			},
+			populate: '*',
+		},
+		{
+			encodeValuesOnly: true,
+		}
+	);
+	const res = await fetch(`${API_URL}/api/events?${query}`);
+	console.log(query)
+	let events = await res.json();
+	events = transEventsWithPicture(events.data);
 
 	return {
 		props: {
