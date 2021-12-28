@@ -1,6 +1,7 @@
 import { FaPencilAlt, FaTimes } from 'react-icons/fa';
 import Link from 'next/link';
 import Image from 'next/image';
+import qs from 'qs';
 import Layout from '@/components/Layout';
 import { API_URL } from '@/config/index';
 import styles from '@/styles/Event.module.css';
@@ -72,7 +73,6 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params: { slug } }) {
-	const qs = require('qs');
 	const query = qs.stringify(
 		{
 			filters: {
@@ -87,7 +87,6 @@ export async function getStaticProps({ params: { slug } }) {
 		}
 	);
 	const res = await fetch(`${API_URL}/api/events?${query}`);
-	console.log(query)
 	let events = await res.json();
 	events = transEventsWithPicture(events.data);
 

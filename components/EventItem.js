@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { API_URL } from '@/config/index';
 import styles from '@/styles/EventItem.module.css';
 
 export default function EventItem({ evt }) {
