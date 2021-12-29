@@ -87,6 +87,7 @@ export async function getStaticProps({ params: { slug } }) {
 		}
 	);
 	const res = await fetch(`${API_URL}/api/events?${query}`);
+	console.log(query);
 	let events = await res.json();
 	events = transEventsWithPicture(events.data);
 
